@@ -1,0 +1,72 @@
+
+
+html {
+	box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+img {
+	max-width: 100%;
+}
+
+body {
+	font-family: 'font', sans-serif;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+}
+
+.list-reset {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.container {
+  max-width: 1140px;
+	/* при установке ширины контейнера надо задать ширину + паддинги */
+  /* паддинги нужны чтобы верстка не прилипала к краям  */
+  padding: 0 15px;
+  margin: 0 auto;
+
+}
+
+.btn-reset {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.btn {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.stroke {
+  text-align: center;
+}
+
+
+.fasdf {
+  text-transform: capitalize;
+}
