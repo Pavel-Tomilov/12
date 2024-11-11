@@ -11,55 +11,81 @@ async function serverAddStudent(obj) {
   return data
 }
 
+async function serverGetStudent() {
+  let response = await fetch(SERVER_URL + '/api/students', {
+    method: "GET",
+    headers: { 'Content-Type': 'application/json' }, 
+  })
+  let data = await response.json()
 
+  return data
+}
+
+async function serverDeleteStudent(id) {
+  let response = await fetch(SERVER_URL + '/api/students/' + id, {
+    method: "DELETE",
+  
+  })
+  let data = await response.json()
+
+  return data
+}
+
+let serverData = await serverGetStudent()
 
 // const students = [{
 //   name: 'Олег',
-//   lastname: 'Филимонов',
-//   middleName: 'Александрович',
-//   birthDate: '31.12.1985',
-//   startYear: 2020,
+//   surname: 'Филимонов',
+//   lastname: 'Александрович',
+//   birthday: '31.12.1985',
+//   studyStart: 2020,
 //   faculty: 'Исторический'
 // },
 
 // {
 //   name: 'Ирина',
-//   lastname: 'Балуевская',
-//   middleName: 'Алексеевна',
-//   birthDate: '22.11.1987',
-//   startYear: 2021,
+//   surname: 'Балуевская',
+//   lastname: 'Алексеевна',
+//   birthday: '22.11.1987',
+//   studyStart: 2021,
 //   faculty: 'Филологический'
 // },
 
 // {
 //   name: 'Иван',
-//   lastname: 'Туваев',
-//   middleName: 'Николаевич',
-//   birthDate: '23.09.1990',
-//   startYear: 2022,
+//   surname: 'Туваев',
+//   lastname: 'Николаевич',
+//   birthday: '23.09.1990',
+//   studyStart: 2022,
 //   faculty: 'Энергетический'
 // },
 
 // {
 //   name: 'Дмитрий',
-//   lastname: 'Шин',
-//   middleName: 'Валерьевич',
-//   birthDate: '22.08.1987',
-//   startYear: 2020,
+//   surname: 'Шин',
+//   lastname: 'Валерьевич',
+//   birthday: '22.08.1987',
+//   studyStart: 2020,
 //   faculty: 'Математический'
 // },
 
 // {
 //   name: 'Евгений',
-//   lastname: 'Козлов',
-//   middleName: 'Петрович',
-//   birthDate: '30.07.1998',
-//   startYear: 2023,
+//   surname: 'Козлов',
+//   lastname: 'Петрович',
+//   birthday: '30.07.1998',
+//   studyStart: 2023,
 //   faculty: 'Исторический'
 // }
 // ];
 
-const students = []
+
+
+let students = []
+
+if(serverData !== null) {
+students = serverData
+}
 
 const addForm = document.getElementById('add-form');
 const tbody = document.querySelector('#studentTable tbody');
@@ -69,7 +95,7 @@ let sortDirection = 'asc';
 
 const filterForm = document.getElementById('filter-form');
 const fioFilterInp = document.getElementById('filter-fio');
-const startYearFilterInp = document.getElementById('filter-startYear');
+const studyStartFilterInp = document.getElementById('filter-studyStart');
 const endYearFilterInp = document.getElementById('filter-endYear');
 const facultyFilterInp = document.getElementById('filter-faculty')
 
@@ -78,17 +104,17 @@ const facultyFilterInp = document.getElementById('filter-faculty')
 
 function clearForm() {
   document.getElementById('name').value = '';
+  document.getElementById('surname').value = '';
   document.getElementById('lastname').value = '';
-  document.getElementById('middleName').value = '';
-  document.getElementById('birthDate').value = '';
-  document.getElementById('startYear').value = '';
+  document.getElementById('birthday').value = '';
+  document.getElementById('studyStart').value = '';
   document.getElementById('faculty').value = '';
 }
 
 // Функция, которая считает возраст
-function calculateAge(birthDate) {
+function calculateAge(birthday) {
   const today = new Date();
-  const birth = new Date(birthDate.split('.').reverse().join('-')); // Преобразование строки в объект Date
+  const birth = new Date(birthday.split('.').reverse().join('-')); // Преобразование строки в объект Date
 
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
@@ -104,9 +130,9 @@ function calculateAge(birthDate) {
 // Фильтрация
 
 function filter(arr, prop, value) {
-  if (prop === 'startYear') {
+  if (prop === 'studyStart') {
     // Фильтрация по году начала обучения
-    return arr.filter(student => student.startYear === parseInt(value.trim()));
+    return arr.filter(student => student.studyStart === parseInt(value.trim()));
   } else if (prop === 'endYear') {
     // Фильтрация по году окончания обучения
     return arr.filter(student => student.endYear === parseInt(value.trim()));
@@ -150,17 +176,32 @@ function createOneStudent(student) {
   const facultyCell = document.createElement('td');
   facultyCell.textContent = student.faculty;
   facultyCell.classList.add('fasdf')
-  const birthDateCell = document.createElement('td');
-  birthDateCell.textContent = student.birthDate + ' ' + '(' + student.age + ' ' + 'лет' + ')';
-  const startYearCell = document.createElement('td');
-  startYearCell.textContent = student.year + ' ' + '(' + student.status + ')';
+  const birthdayCell = document.createElement('td');
+  birthdayCell.textContent = student.birthday + ' ' + '(' + student.age + ' ' + 'лет' + ')';
+  const studyStartCell = document.createElement('td');
+  studyStartCell.textContent = `${student.year} (${student.status})`;
+  const tdDelete = document.createElement('td')
+  const btnDelete = document.createElement('button')
+  btnDelete.classList.add("btn", "btn-danger", "w-100")
+  btnDelete.textContent = "Удалить"
   const row = document.createElement('tr');
+
+btnDelete.addEventListener("click", async function() {
+  const studentId = student.id; // Получаем ID студента
+  await serverDeleteStudent(studentId); // Удаляем с сервера
+
+  // Обновляем локальный массив студентов, исключая удаленного студента
+  students = students.filter(s => s.id !== studentId);
+  render(students); // Перерисовываем таблицу
+})
 
   // Добавляем ячейки в строку
   row.appendChild(nameCell);
   row.appendChild(facultyCell);
-  row.appendChild(birthDateCell);
-  row.appendChild(startYearCell);
+  row.appendChild(birthdayCell);
+  row.appendChild(studyStartCell);
+  row.appendChild(btnDelete);
+  
 
   return (row)
 }
@@ -173,12 +214,12 @@ function render(arrData) {
 
 
   for (const student of copyStudents) {
-    student.FIO = student.lastname + ' ' + student.name + ' ' + student.middleName;
+    student.FIO = student.surname + ' ' + student.name + ' ' + student.lastname;
     const currentYear = new Date().getFullYear();
-    student.well = currentYear - student.startYear + 1;
-    student.year = `${student.startYear} - ${student.startYear + 4}`;
-    student.endYear = student.startYear + 4;
-    student.age = calculateAge(student.birthDate)
+    student.well = currentYear - student.studyStart + 1;
+    student.endYear = student.studyStart + 4;
+    student.year = `${student.studyStart} - ${student.endYear}`;
+    student.age = calculateAge(student.birthday)
 
     if (currentYear > student.endYear || (currentYear === student.endYear && new Date().getMonth() >= 8)) {
 
@@ -194,8 +235,8 @@ function render(arrData) {
     copyStudents = filter(copyStudents, 'FIO', fioFilterInp.value)
   }
 
-  if (startYearFilterInp.value.trim() !== "") {
-    copyStudents = filter(copyStudents, 'startYear', startYearFilterInp.value)
+  if (studyStartFilterInp.value.trim() !== "") {
+    copyStudents = filter(copyStudents, 'studyStart', studyStartFilterInp.value)
   }
 
   if (endYearFilterInp.value.trim() !== "") {
@@ -223,13 +264,12 @@ addForm.addEventListener('submit', async function (event) {
   event.preventDefault();
 
   // Валидация фамилии
-  if (lastname.value.trim() === '') {
+  if (surname.value.trim() === '') {
     alert('Фамилия не введена!');
     return;
   }
 
   // Валидация имени
-
   const name = document.getElementById('name')
   if (name.value.trim() === '') {
     alert('Имя не введено!');
@@ -237,27 +277,27 @@ addForm.addEventListener('submit', async function (event) {
   }
 
   // Валидация отчества
-  if (middleName.value.trim() === '') {
+  if (lastname.value.trim() === '') {
     alert('Отчество не введено!');
     return;
   }
 
   const today = new Date();
   const currentYear = today.getFullYear();
-  const birthDateValue = document.getElementById('birthDate').value;
-  const birthDateParsed = new Date(birthDateValue);
-  const birthDateNumber = birthDateParsed.getTime();
+  const birthdayValue = document.getElementById('birthday').value;
+  const birthdayParsed = new Date(birthdayValue);
+  const birthdayNumber = birthdayParsed.getTime();
 
 
-  const minBirthDate = new Date('1900-01-01').getTime();
-  if (isNaN(birthDateParsed.getTime()) || birthDateNumber < minBirthDate || birthDateNumber > today.getTime()) {
+  const minbirthday = new Date('1900-01-01').getTime();
+  if (isNaN(birthdayParsed.getTime()) || birthdayNumber < minbirthday || birthdayNumber > today.getTime()) {
     alert('Дата рождения должна быть в диапазоне от 01.01.1900 до текущей даты!');
     return;
   }
 
   // Валидация года начала обучения
-  const startYearValue = parseInt(document.getElementById('startYear').value.trim(), 10);
-  if (isNaN(startYearValue) || startYearValue < 2000 || startYearValue > new Date().getFullYear()) {
+  const studyStartValue = parseInt(document.getElementById('studyStart').value.trim(), 10);
+  if (isNaN(studyStartValue) || studyStartValue < 2000 || studyStartValue > new Date().getFullYear()) {
     alert(`Год начала обучения должен быть в диапазоне от 2000 до ${new Date().getFullYear()}!`);
     return;
   }
@@ -269,17 +309,17 @@ addForm.addEventListener('submit', async function (event) {
   }
 
   // Добавление студента после валидации
-  students.push({
+  let newStudentObj = {
     name: document.getElementById('name').value.trim(),
+    surname: document.getElementById('surname').value.trim(),
     lastname: document.getElementById('lastname').value.trim(),
-    middleName: document.getElementById('middleName').value.trim(),
-    birthDate: formatDate(birthDateValue),
-    startYear: startYearValue,
+    birthday: formatDate(birthdayValue),
+    studyStart: studyStartValue,
     faculty: document.getElementById('faculty').value.trim(),
-  });
+  };
 
-  console.log(await serverAddStudent(students))
-
+  let serverDataObj = await serverAddStudent(newStudentObj)
+students.push(serverDataObj)
   render(students);
   clearForm();
 
@@ -319,7 +359,7 @@ filterForm.addEventListener('submit', function (event) {
 fioFilterInp.addEventListener('input', function () {
   render(students)
 })
-startYearFilterInp.addEventListener('input', function () {
+studyStartFilterInp.addEventListener('input', function () {
   render(students)
 })
 endYearFilterInp.addEventListener('input', function () {
