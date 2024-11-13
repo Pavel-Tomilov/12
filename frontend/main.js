@@ -132,10 +132,10 @@ function calculateAge(birthday) {
 function filter(arr, prop, value) {
   if (prop === 'studyStart') {
     // Фильтрация по году начала обучения
-    return arr.filter(student => student.studyStart === parseInt(value.trim()));
+    return arr.filter(student => Number(student.studyStart) === parseInt(value.trim()));
   } else if (prop === 'endYear') {
     // Фильтрация по году окончания обучения
-    return arr.filter(student => student.endYear === parseInt(value.trim()));
+    return arr.filter(student => Number(student.endYear) === parseInt(value.trim()));
   } else if (prop === 'FIO') {
     // Фильтрация по ФИО
     return arr.filter(student => student.FIO.toLowerCase().includes(value.trim().toLowerCase()));
@@ -217,7 +217,7 @@ function render(arrData) {
     student.FIO = student.surname + ' ' + student.name + ' ' + student.lastname;
     const currentYear = new Date().getFullYear();
     student.well = currentYear - student.studyStart + 1;
-    student.endYear = student.studyStart + 4;
+    student.endYear = student.studyStart - (-4);
     student.year = `${student.studyStart} - ${student.endYear}`;
     student.age = calculateAge(student.birthday)
 
